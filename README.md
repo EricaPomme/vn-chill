@@ -1,6 +1,6 @@
 # vn-chill
 
-A toggle script for entering/exiting "Ren'Py chill mode" on macOS — optimizing your system for lap/chest comfort while reading visual novels.
+A toggle script for entering/exiting "Ren'Py chill mode" on macOS — optimizing your system for temperature control and power management while reading visual novels.
 
 ## Purpose
 

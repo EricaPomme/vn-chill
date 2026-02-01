@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# vn-chill.sh — toggle a "Ren'Py chill mode" for lap/chest comfort.
+# vn-chill.sh — toggle a "Ren'Py chill mode" for temperature and power management.
 # - Quits select apps (graceful -> kill)
 # - Enables Low Power Mode
 # - Forces built-in display to 60 Hz using displayplacer
@@ -105,7 +105,7 @@ get_current_display_mode() {
   # Extract key:value tokens robustly
   local res hz depth scaling
   res="$(echo "$line" | grep -oE 'res:[0-9]+x[0-9]+' | head -n1 | cut -d: -f2)"
-  hz="$(echo "$line" | grep -oE 'hz:[0-9]+'           | head -n1 | cut -d: -f2)"
+  hz="$(echo "$line" | grep -oE 'hz:[0-9]+' | head -n1 | cut -d: -f2)"
   depth="$(echo "$line" | grep -oE 'color_depth:[0-9]+' | head -n1 | cut -d: -f2)"
   scaling="$(echo "$line" | grep -oE 'scaling:(on|off)'  | head -n1 | cut -d: -f2)"
 
