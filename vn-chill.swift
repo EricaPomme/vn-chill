@@ -14,11 +14,15 @@ struct Config {
 }
 
 struct DisplayModeState: Codable {
-    let width: Int
-    let height: Int
+    let logicalWidth: Int
+    let logicalHeight: Int
     let pixelWidth: Int
     let pixelHeight: Int
     let refreshRate: Double
+
+    var prettyDescription: String {
+        "\(logicalWidth)x\(logicalHeight) @ \(Int(refreshRate.rounded()))Hz"
+    }
 }
 
 struct LockState: Codable {
@@ -117,8 +121,8 @@ func builtInDisplayID() -> CGDirectDisplayID? {
 func currentModeState(for displayID: CGDirectDisplayID) -> DisplayModeState? {
     guard let mode = CGDisplayCopyDisplayMode(displayID) else { return nil }
     return DisplayModeState(
-        width: mode.width,
-        height: mode.height,
+        logicalWidth: mode.width,
+        logicalHeight: mode.height,
         pixelWidth: mode.pixelWidth,
         pixelHeight: mode.pixelHeight,
         refreshRate: mode.refreshRate
@@ -131,8 +135,8 @@ func allModes(for displayID: CGDirectDisplayID) -> [CGDisplayMode] {
 
 func restoreMode(for displayID: CGDirectDisplayID, from state: DisplayModeState) -> CGDisplayMode? {
     allModes(for: displayID).first {
-        $0.width == state.width &&
-            $0.height == state.height &&
+        $0.width == state.logicalWidth &&
+            $0.height == state.logicalHeight &&
             $0.pixelWidth == state.pixelWidth &&
             $0.pixelHeight == state.pixelHeight &&
             abs($0.refreshRate - state.refreshRate) < 0.1
@@ -245,6 +249,19 @@ func readLockFile() throws -> LockState {
     return try decoder.decode(LockState.self, from: data)
 }
 
+func displayIDForRestore(_ lockState: LockState) throws -> CGDirectDisplayID {
+    let online = Set(getOnlineDisplays())
+    if online.contains(lockState.displayID) {
+        return lockState.displayID
+    }
+
+    if let builtIn = builtInDisplayID() {
+        return builtIn
+    }
+
+    throw VNChillError.missingBuiltInDisplay
+}
+
 func enterChillMode() throws {
     guard let displayID = builtInDisplayID() else {
         throw VNChillError.missingBuiltInDisplay
@@ -260,7 +277,7 @@ func enterChillMode() throws {
 
     log("Entering VN Chill Mode")
     quitConfiguredApps()
-    log("Current display mode: \(previousMode.width)x\(previousMode.height) @ \(Int(previousMode.refreshRate.rounded()))Hz")
+    log("Current display mode: \(previousMode.prettyDescription)")
     log("Current Low Power Mode: \(previousLPM)")
 
     try setLowPowerMode(1)
@@ -280,7 +297,7 @@ func enterChillMode() throws {
 
 func exitChillMode() throws {
     let state = try readLockFile()
-    let displayID = getOnlineDisplays().contains(state.displayID) ? state.displayID : (builtInDisplayID() ?? state.displayID)
+    let displayID = try displayIDForRestore(state)
     guard let mode = restoreMode(for: displayID, from: state.previousMode) else {
         throw VNChillError.restoreModeUnavailable
     }
