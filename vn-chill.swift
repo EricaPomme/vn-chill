@@ -6,8 +6,9 @@ import AppKit
 import CoreGraphics
 
 struct Config {
+    // Populate with bundle identifiers, e.g. ["com.apple.Safari", "com.discordapp.Discord"].
     static let appsToQuit: [String] = []
-    static let quitGraceSeconds = 4
+    static let appQuitGraceSeconds = 4
     static let chillWidth = 1280
     static let chillHeight = 800
     static let chillRefreshHz = 60
@@ -161,9 +162,7 @@ func setDisplayMode(_ mode: CGDisplayMode, for displayID: CGDirectDisplayID) thr
         throw VNChillError.displayConfigBeginFailed(beginResult)
     }
 
-    guard let configRef else {
-        throw VNChillError.displayConfigBeginFailed(.failure)
-    }
+    let configRef = configRef!
 
     let setResult = CGConfigureDisplayWithDisplayMode(configRef, displayID, mode, nil)
     guard setResult == .success else {
@@ -180,9 +179,10 @@ func getLowPowerModeState() throws -> Int {
     let result = runProcess("/usr/bin/pmset", ["-g"])
     guard result.status == 0 else { throw VNChillError.pmsetReadFailed }
 
-    guard let lowPowerLine = result.stdout
+    let pmsetLines = result.stdout
         .split(separator: "\n")
-        .map({ $0.trimmingCharacters(in: .whitespaces) })
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+    guard let lowPowerLine = pmsetLines
         .first(where: { $0.hasPrefix("lowpowermode") })
     else {
         throw VNChillError.pmsetReadFailed
@@ -220,7 +220,7 @@ func quitConfiguredApps() {
         apps.forEach { _ = $0.terminate() }
 
         var waited = 0
-        while waited < Config.quitGraceSeconds {
+        while waited < Config.appQuitGraceSeconds {
             if runningApps(bundleIdentifier: bundleIdentifier).isEmpty { break }
             Thread.sleep(forTimeInterval: 1)
             waited += 1
