@@ -6,7 +6,7 @@ import AppKit
 import CoreGraphics
 
 struct Config {
-    static let closeApps = ["Discord"]
+    static let appsToQuit = ["com.hnc.Discord"]
     static let quitGraceSeconds = 4
     static let chillWidth = 1280
     static let chillHeight = 800
@@ -203,33 +203,34 @@ func setLowPowerMode(_ value: Int) throws {
     }
 }
 
-func runningApps(named name: String) -> [NSRunningApplication] {
-    NSWorkspace.shared.runningApplications.filter { $0.localizedName == name }
+func runningApps(bundleIdentifier: String) -> [NSRunningApplication] {
+    NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
 }
 
 func quitConfiguredApps() {
-    for name in Config.closeApps {
-        let apps = runningApps(named: name)
+    for bundleIdentifier in Config.appsToQuit {
+        let apps = runningApps(bundleIdentifier: bundleIdentifier)
+        let label = apps.first?.localizedName ?? bundleIdentifier
         if apps.isEmpty {
-            log("Not running (skip): \(name)")
+            log("Not running (skip): \(label)")
             continue
         }
 
-        log("Requesting quit: \(name)")
+        log("Requesting quit: \(label)")
         apps.forEach { _ = $0.terminate() }
 
         var waited = 0
         while waited < Config.quitGraceSeconds {
-            if runningApps(named: name).isEmpty { break }
+            if runningApps(bundleIdentifier: bundleIdentifier).isEmpty { break }
             Thread.sleep(forTimeInterval: 1)
             waited += 1
         }
 
-        let remaining = runningApps(named: name)
+        let remaining = runningApps(bundleIdentifier: bundleIdentifier)
         if remaining.isEmpty {
-            log("Exited cleanly: \(name)")
+            log("Exited cleanly: \(label)")
         } else {
-            log("Force killing: \(name)")
+            log("Force killing: \(label)")
             remaining.forEach { _ = $0.forceTerminate() }
         }
     }
