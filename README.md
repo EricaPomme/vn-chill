@@ -24,7 +24,7 @@ Before first use, edit `vn-chill.swift` and configure:
 1. **Config.appsToQuit** — Add/remove app bundle identifiers to quit when entering chill mode (e.g. `com.apple.Safari`)
    - Tip: find bundle IDs with `osascript -e 'id of app "Safari"'`
 2. **Config.chillWidth / Config.chillHeight / Config.chillRefreshHz** — Adjust display settings as desired
-3. **Config.appQuitGraceSeconds** — Delay before force-terminating apps
+3. **Config.appQuitGracePeriod** — Delay before force-terminating apps
 
 ## Usage
 

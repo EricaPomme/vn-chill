@@ -8,7 +8,8 @@ import CoreGraphics
 struct Config {
     // Populate with bundle identifiers, e.g. ["com.apple.Safari", "com.discordapp.Discord"].
     static let appsToQuit: [String] = []
-    static let appQuitGraceSeconds = 4
+    // In seconds.
+    static let appQuitGracePeriod = 4
     static let chillWidth = 1280
     static let chillHeight = 800
     static let chillRefreshHz = 60
@@ -21,7 +22,7 @@ struct DisplayModeState: Codable {
     let pixelHeight: Int
     let refreshRate: Double
 
-    var prettyDescription: String {
+    var displayDescription: String {
         "\(width)x\(height) @ \(Int(refreshRate.rounded()))Hz"
     }
 }
@@ -225,7 +226,7 @@ func quitConfiguredApps() {
         apps.forEach { _ = $0.terminate() }
 
         var waited = 0
-        while waited < Config.appQuitGraceSeconds {
+        while waited < Config.appQuitGracePeriod {
             if runningApps(bundleIdentifier: bundleIdentifier).isEmpty { break }
             Thread.sleep(forTimeInterval: 1)
             waited += 1
@@ -283,7 +284,7 @@ func enterChillMode() throws {
 
     log("Entering VN Chill Mode")
     quitConfiguredApps()
-    log("Current display mode: \(previousMode.prettyDescription)")
+    log("Current display mode: \(previousMode.displayDescription)")
     log("Current Low Power Mode: \(previousLPM)")
 
     try setLowPowerMode(1)
