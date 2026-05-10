@@ -14,36 +14,35 @@ Running the script a second time restores your original settings.
 
 ## Requirements
 
-- **macOS** (tested on systems with `pmset` and AppleScript support)
-- **[displayplacer](https://github.com/jakehilborn/displayplacer)** — Install via:
-  ```sh
-  brew install displayplacer
-  ```
+- **macOS**
 - **sudo access** — Required for `pmset` to toggle Low Power Mode
 
 ## Configuration
 
-Before first use, edit `vn-chill.sh` and configure:
+Before first use, edit `vn-chill.swift` and configure:
 
-1. **DISPLAY_ID** — Run `displayplacer list` and copy your built-in display's persistent ID
-2. **CLOSE_APPS** — Add/remove app names to quit when entering chill mode
-3. **CHILL_RES / CHILL_HZ / CHILL_COLOR_DEPTH / CHILL_SCALING** — Adjust display settings as desired
+1. **Config.closeApps** — Add/remove app names to quit when entering chill mode
+2. **Config.chillWidth / Config.chillHeight / Config.chillRefreshHz** — Adjust display settings as desired
+3. **Config.quitGraceSeconds** — Delay before force-terminating apps
 
 ## Usage
 
+Compile and run:
+
 ```sh
-./vn-chill.sh
+swiftc vn-chill.swift -framework AppKit -framework CoreGraphics -o vn-chill
+./vn-chill
 ```
 
-- **First run**: Enters chill mode, creates `~/.vn-chill.lock`
+- **First run**: Enters chill mode, creates `~/.vn-chill.json`
 - **Second run**: Restores previous settings, removes lockfile
 
 ## How It Works
 
-1. **Enter mode**: Captures current display settings and Low Power Mode state, quits configured apps, applies chill settings, writes lockfile
+1. **Enter mode**: Finds the built-in display, captures current mode + Low Power Mode state, quits configured apps, applies chill settings, writes lockfile
 2. **Exit mode**: Reads lockfile, restores original display and power settings, removes lockfile
 
-Apps are asked to quit gracefully via AppleScript; after a 4-second grace period, they're force-killed if still running.
+Apps are asked to quit gracefully through `NSRunningApplication`; after the grace period, they are force-terminated if still running.
 
 ---
 
