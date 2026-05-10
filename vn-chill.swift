@@ -162,7 +162,9 @@ func setDisplayMode(_ mode: CGDisplayMode, for displayID: CGDirectDisplayID) thr
         throw VNChillError.displayConfigBeginFailed(beginResult)
     }
 
-    let configRef = configRef!
+    guard let configRef else {
+        throw VNChillError.displayConfigBeginFailed(.failure)
+    }
 
     let setResult = CGConfigureDisplayWithDisplayMode(configRef, displayID, mode, nil)
     guard setResult == .success else {
