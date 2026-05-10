@@ -8,7 +8,7 @@ import CoreGraphics
 struct Config {
     // Populate with bundle identifiers, e.g. ["com.apple.Safari", "com.discordapp.Discord"].
     static let appsToQuit: [String] = []
-    // In seconds.
+    // appQuitGracePeriod is measured in seconds.
     static let appQuitGracePeriod = 4
     static let chillWidth = 1280
     static let chillHeight = 800
@@ -195,7 +195,7 @@ func getLowPowerModeState() throws -> Int {
     let fields = lowPowerLine
         .components(separatedBy: .whitespaces)
         .filter { !$0.isEmpty }
-    guard fields.count >= 2, let value = Int(fields[1]) else {
+    guard let valueToken = fields.dropFirst().first, let value = Int(valueToken) else {
         throw VNChillError.pmsetReadFailed
     }
     return value
