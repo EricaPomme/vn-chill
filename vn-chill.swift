@@ -149,9 +149,10 @@ func chillMode(for displayID: CGDirectDisplayID) -> CGDisplayMode? {
         $0.width == Config.chillWidth && $0.height == Config.chillHeight
     }
     guard !candidates.isEmpty else { return nil }
+    let targetRefresh = Double(Config.chillRefreshHz)
 
     return candidates.min {
-        abs($0.refreshRate - Double(Config.chillRefreshHz)) < abs($1.refreshRate - Double(Config.chillRefreshHz))
+        abs($0.refreshRate - targetRefresh) < abs($1.refreshRate - targetRefresh)
     }
 }
 
@@ -311,7 +312,11 @@ func exitChillMode() throws {
     try setDisplayMode(mode, for: displayID)
     try setLowPowerMode(state.previousLowPowerMode)
 
-    try? FileManager.default.removeItem(at: lockFileURL())
+    do {
+        try FileManager.default.removeItem(at: lockFileURL())
+    } catch {
+        log("Warning: failed to remove lockfile: \(error)")
+    }
     log("Restored. Lockfile removed.")
 }
 
