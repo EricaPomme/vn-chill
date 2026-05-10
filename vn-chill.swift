@@ -23,7 +23,7 @@ struct DisplayModeState: Codable {
     let refreshRate: Double
 
     var displayDescription: String {
-        "\(width)x\(height) @ \(Int(refreshRate.rounded()))Hz"
+        "\(width)x\(height) @ \(Int(refreshRate.rounded(.toNearestOrAwayFromZero)))Hz"
     }
 }
 
@@ -96,7 +96,7 @@ func runProcess(_ launchPath: String, _ arguments: [String]) -> (status: Int32, 
         try process.run()
         process.waitUntilExit()
     } catch {
-        return (1, "", error.localizedDescription)
+        return (127, "", "Failed to launch process \(launchPath): \(error.localizedDescription)")
     }
 
     let outData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
