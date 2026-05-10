@@ -137,10 +137,10 @@ func allModes(for displayID: CGDirectDisplayID) -> [CGDisplayMode] {
 func restoreMode(for displayID: CGDirectDisplayID, from state: DisplayModeState) -> CGDisplayMode? {
     allModes(for: displayID).first {
         $0.width == state.width &&
-            $0.height == state.height &&
-            $0.pixelWidth == state.pixelWidth &&
-            $0.pixelHeight == state.pixelHeight &&
-            abs($0.refreshRate - state.refreshRate) < 0.1
+        $0.height == state.height &&
+        $0.pixelWidth == state.pixelWidth &&
+        $0.pixelHeight == state.pixelHeight &&
+        abs($0.refreshRate - state.refreshRate) < 0.1
     }
 }
 
@@ -190,7 +190,9 @@ func getLowPowerModeState() throws -> Int {
         throw VNChillError.pmsetReadFailed
     }
 
-    let fields = lowPowerLine.split(whereSeparator: \.isWhitespace)
+    let fields = lowPowerLine
+        .components(separatedBy: .whitespaces)
+        .filter { !$0.isEmpty }
     guard fields.count >= 2, let value = Int(fields[1]) else {
         throw VNChillError.pmsetReadFailed
     }
