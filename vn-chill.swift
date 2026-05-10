@@ -6,7 +6,7 @@ import AppKit
 import CoreGraphics
 
 struct Config {
-    static let appsToQuit = ["com.hnc.Discord"]
+    static let appsToQuit: [String] = []
     static let quitGraceSeconds = 4
     static let chillWidth = 1280
     static let chillHeight = 800
@@ -14,14 +14,14 @@ struct Config {
 }
 
 struct DisplayModeState: Codable {
-    let logicalWidth: Int
-    let logicalHeight: Int
+    let width: Int
+    let height: Int
     let pixelWidth: Int
     let pixelHeight: Int
     let refreshRate: Double
 
     var prettyDescription: String {
-        "\(logicalWidth)x\(logicalHeight) @ \(Int(refreshRate.rounded()))Hz"
+        "\(width)x\(height) @ \(Int(refreshRate.rounded()))Hz"
     }
 }
 
@@ -121,8 +121,8 @@ func builtInDisplayID() -> CGDirectDisplayID? {
 func currentModeState(for displayID: CGDirectDisplayID) -> DisplayModeState? {
     guard let mode = CGDisplayCopyDisplayMode(displayID) else { return nil }
     return DisplayModeState(
-        logicalWidth: mode.width,
-        logicalHeight: mode.height,
+        width: mode.width,
+        height: mode.height,
         pixelWidth: mode.pixelWidth,
         pixelHeight: mode.pixelHeight,
         refreshRate: mode.refreshRate
@@ -135,8 +135,8 @@ func allModes(for displayID: CGDirectDisplayID) -> [CGDisplayMode] {
 
 func restoreMode(for displayID: CGDirectDisplayID, from state: DisplayModeState) -> CGDisplayMode? {
     allModes(for: displayID).first {
-        $0.width == state.logicalWidth &&
-            $0.height == state.logicalHeight &&
+        $0.width == state.width &&
+            $0.height == state.height &&
             $0.pixelWidth == state.pixelWidth &&
             $0.pixelHeight == state.pixelHeight &&
             abs($0.refreshRate - state.refreshRate) < 0.1
